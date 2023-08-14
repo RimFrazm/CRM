@@ -1,24 +1,27 @@
-# Stage 1: Build the application
+#FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+#WORKDIR /app
+#COPY *.csproj ./
+#RUN dotnet restore
+#COPY . .
+#RUN dotnet build CRM.sln -c Release --no-restore
+#RUN dotnet publish CRM.sln -c Release -o out
+#FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS runtime
+#WORKDIR /app
+#COPY --from=build /app/out .
+#EXPOSE 80
+#ENTRYPOINT ["dotnet", "CRM.dll"]
+#---------------------------------------
 FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
 WORKDIR /app
-COPY . ./
-
-# Copy the project files and restore dependencies
-#COPY CRM.csproj ./
+COPY *.csproj ./
 RUN dotnet restore
-
-# Copy the rest of the application files and build
-#COPY . ./
+COPY . .
 RUN dotnet build -c Release --no-restore
 RUN dotnet publish -c Release -o out
-
-# Stage 2: Create the runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS runtime
 WORKDIR /app
-
-# Copy the published files from the build stage
 COPY --from=build /app/out .
-
 EXPOSE 80
 EXPOSE 5001
+EXPOSE 44351
 ENTRYPOINT ["dotnet", "CRM.dll"]
